@@ -1,0 +1,177 @@
+// Home.js
+import { useState, useEffect } from "react";
+import FilterBar from "../Component/Home/FilterBar";
+import MainContent from "../Component/Home/MainContent";
+import styles from "../styles/home.module.css";
+import Loader from "../Component/Loader/Loader";
+// import { data } from "../Assets/data";
+import axios from "axios";
+
+import {
+  authSelector,
+  getInitialUserList,
+  setLoggedIn,
+  setUserLoggedIn,
+} from "../Redux/Reducers/authReducer";
+import { getInitialCartOrdersThunk } from "../Redux/Reducers/productReducer";
+import { useDispatch, useSelector } from "react-redux";
+
+export function Home() {
+  const dispatch = useDispatch();
+
+  const { isLoggedIn, userLoggedIn } = useSelector(authSelector);
+
+  const [isLoading, setLoading] = useState(true);
+
+  const [applyFilter, setApplyFilter] = useState(false);
+
+  const [price, setPrice] = useState(30000);
+  const [category, setCategory] = useState("none");
+
+  const [search, setSearch] = useState("");
+
+  const [data, setData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20; // Adjust this based on your preference
+
+  useEffect(() => {
+    dispatch(getInitialCartOrdersThunk());
+  }, [userLoggedIn]);
+
+  useEffect(() => {
+    dispatch(getInitialUserList());
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLoading(false);
+    }, 500);
+
+    const token = window.localStorage.getItem("token");
+    if (token) {
+      const index = window.localStorage.getItem("index");
+      const user = JSON.parse(index);
+
+      dispatch(setLoggedIn(token));
+      dispatch(setUserLoggedIn(user));
+    }
+  }, []);
+
+  // Update currentPage to 1 when the search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
+
+  useEffect(() => {
+    // Fetch paginated data and calculate total pages
+    const fetchPosts = async () => {
+      setLoading(true);
+      const res = await axios.get('http://localhost:8000/api/v1/users');
+      setData(res.data.data);
+      setLoading(false)
+    }
+      
+    fetchPosts();
+  }, [currentPage]);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    console.log("Page Changed:", newPage);
+  };
+
+  const pageCount = Math.ceil(data.length / itemsPerPage);
+  const marginPagesDisplayed = 4; // Adjust this based on your preference
+  const marginRangeDisplayed = 4; // Adjust this based on your preference
+  const FIRST_PAGES = 3;
+  const LAST_PAGES = 3;
+
+  return (
+    <>
+      {/* Loading Screen Condition */}
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <>
+          {/* Page Header */}
+          <div className={styles.header}>
+            {/* Search Bar */}
+            <input
+              type="text"
+              placeholder="Search for product..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          {/* Filter Bar & Main Content Container */}
+          <div className={styles.mainContainer}>
+            {/* Filter Button */}
+            <span className={styles.header}>
+              <button onClick={() => setApplyFilter(!applyFilter)} role="button">
+                {applyFilter ? "Cancel" : "Apply Filter"}
+              </button>{" "}
+            </span>
+
+            {/* Filter Section  */}
+            {applyFilter && <FilterBar price={price} setPrice={setPrice} setCategory={setCategory} />}
+
+            {/* Products Section */}
+            <MainContent
+              search={search}
+              data={data}
+              price={price}
+              category={category}
+              applyFilter={applyFilter}
+              currentPage={currentPage}
+              itemsPerPage={itemsPerPage}
+            />
+
+            
+          </div>
+
+          {/* Pagination controls */}
+          <div className={styles.pagination}>
+            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+              Previous
+            </button>
+            {[...Array(pageCount)].map((_, index) => {
+              const isWithinFirst = index < FIRST_PAGES;
+              const isWithinLast = index >= pageCount - LAST_PAGES;
+              const isWithinRange =
+                index >= currentPage - marginPagesDisplayed &&
+                index <= currentPage + marginPagesDisplayed;
+              const isEdge =
+                index < marginRangeDisplayed || index >= pageCount - marginRangeDisplayed;
+              const shouldRender =
+                isWithinFirst ||
+                isWithinLast ||
+                (isWithinRange && !isEdge) ||
+                (isEdge && Math.abs(currentPage - index) <= marginRangeDisplayed);
+
+              return shouldRender ? (
+                <button
+                  key={index}
+                  onClick={() => handlePageChange(index + 1)}
+                  className={currentPage === index + 1 ? styles.active : ""}
+                >
+                  {index + 1}
+                </button>
+              ) : (
+                <span key={index} className={styles.pageBreak}>
+                  ...
+                </span>
+              );
+            })}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage * itemsPerPage >= data.length}
+            >
+              Next
+            </button>
+          </div>
+        </>
+      )}
+    </>
+  );
+}
