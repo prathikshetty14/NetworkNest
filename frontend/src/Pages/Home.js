@@ -67,7 +67,7 @@ export function Home() {
     // Fetch paginated data and calculate total pages
     const fetchPosts = async () => {
       setLoading(true);
-      const res = await axios.get('http://localhost:8000/api/v1/users');
+      const res = await axios.get('https://networknest-2.onrender.com/api/v1/users');
       setData(res.data.data);
       setLoading(false)
     }
