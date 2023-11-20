@@ -17,7 +17,7 @@ const writeJsonFile = async (data) => {
 // Get all users with pagination
 const getUsers = async (req, res) => {
   try {
-    const { page = 1, limit = 1000 } = req.query;
+    const { page = 1, limit = 10000 } = req.query;
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
 
