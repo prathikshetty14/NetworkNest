@@ -98,7 +98,7 @@ export function Home() {
             {/* Search Bar */}
             <input
               type="text"
-              placeholder="Search for product..."
+              placeholder="Search by name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
