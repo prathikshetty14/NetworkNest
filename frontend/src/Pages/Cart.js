@@ -115,7 +115,7 @@ export function Cart() {
             
             {/* If Cart is Empty  */}
             {cart.length === 0 ? (
-              <h1>OMG! The cart is empty 😱</h1>
+              <h1>OMG! Your team is empty 😱</h1>
             ) : (
               // If Cart is not Empty
               cart.map((product, i) => <CartItem key={i} product={product} />)
