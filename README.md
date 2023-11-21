@@ -1,6 +1,6 @@
 # NetworkNest - Heliverse
 
-Kindly load the backend website before opening the attached link, so it can fetch the details. Here is the link to it:
+Kindly load the backend website first before opening the attached GitHub link, so it can fetch the details correctly. Here is the link to it:
 <br/>
 https://networknest-2.onrender.com/api/v1/users
 
