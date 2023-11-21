@@ -39,7 +39,7 @@ export default function ItemCard(props) {
             onClick={() => dispatch(addToCartThunk(props.item))}
           >
             <span className="text">
-              Add to Cart
+              Select
             </span>
           </button>
         </div>
